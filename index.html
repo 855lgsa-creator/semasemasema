@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>시험 출제용 지도</title>
+  <style>
+    /* 기본 설정 */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --색-배경: #f0f2f5;
+      --색-카드: #ffffff;
+      --색-테두리: #e2e6ea;
+      --색-글자: #1a1a2e;
+      --색-보조글자: #5a6270;
+      --색-강조: #3b6fd4;
+      --색-강조연한: #eef3fc;
+      --그림자: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --모서리: 12px;
+    }
+
+    body {
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      background: var(--색-배경);
+      color: var(--색-글자);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* 전체 레이아웃 */
+    .페이지 {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.25rem;
+    }
+
+    /* 카드 공통 */
+    .카드 {
+      background: var(--색-카드);
+      border: 1px solid var(--색-테두리);
+      border-radius: var(--모서리);
+      box-shadow: var(--그림자);
+      padding: 1.25rem;
+    }
+
+    /* 상단: 제목 + 사용 안내 */
+    .헤더 {
+      margin-bottom: 1.25rem;
+    }
+
+    .헤더__제목 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .헤더__안내 {
+      font-size: 0.9rem;
+      color: var(--색-보조글자);
+    }
+
+    .헤더__안내 ul {
+      margin-top: 0.5rem;
+      padding-left: 1.25rem;
+    }
+
+    .헤더__안내 li + li {
+      margin-top: 0.25rem;
+    }
+
+    /* 가상 데이터 안내 (교육용 — 항상 표시) */
+    .가상데이터안내 {
+      margin-top: 0.85rem;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.82rem;
+      color: #5a4a20;
+      background: #fffbeb;
+      border: 1px solid #f0d060;
+      border-radius: 8px;
+      line-height: 1.5;
+    }
+
+    .가상데이터안내 strong {
+      font-weight: 700;
+    }
+
+    /* 작업 영역: 지도(좌) + 사이드 패널(우) */
+    .작업영역 {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 1.25rem;
+      align-items: start;
+    }
+
+    /* 사이드 패널: 도구 + 목록 */
+    .사이드패널 {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      position: sticky;
+      top: 1.25rem;
+    }
+
+    .패널블록__제목 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--색-글자);
+    }
+
+    /* 도구 모음 */
+    .도구모음 {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .도구모음__그룹 {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .도구모음__라벨 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--색-보조글자);
+      min-width: 2.5rem;
+    }
+
+    /* 버튼 공통 (자리만 — 동작은 나중에 연결) */
+    .버튼 {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: 8px;
+      border: 1px solid var(--색-테두리);
+      background: var(--색-카드);
+      color: var(--색-글자);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .버튼:hover {
+      background: var(--색-강조연한);
+      border-color: var(--색-강조);
+    }
+
+    .버튼--강조 {
+      background: var(--색-강조);
+      border-color: var(--색-강조);
+      color: #fff;
+    }
+
+    .버튼--강조:hover {
+      background: #2f5db8;
+    }
+
+    /* 색상 선택 자리 */
+    .색상선택 {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .색상칩 {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      border: 2px solid var(--색-테두리);
+      cursor: pointer;
+      transition: transform 0.15s, border-color 0.15s;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .색상칩:hover {
+      transform: scale(1.1);
+      border-color: var(--색-강조);
+    }
+
+    .색상칩--선택됨 {
+      border-color: var(--색-글자);
+      box-shadow: 0 0 0 2px var(--색-카드), 0 0 0 4px var(--색-강조);
+    }
+
+    /* 지도 영역 */
+    .지도영역 {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .지도캔버스 {
+      flex: 1;
+      min-height: 460px;
+      background: #dbeafe;
+      border: 1px solid var(--색-테두리);
+      border-radius: 8px;
+      padding: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .지도캔버스 svg {
+      width: 100%;
+      max-width: 400px;
+      height: auto;
+      max-height: 100%;
+      user-select: none;
+    }
+
+    /* 지역 도형 */
+    .지역 {
+      fill: #e8edf4;
+      stroke: #ffffff;
+      stroke-width: 2;
+      cursor: pointer;
+      transition: fill 0.15s, stroke 0.15s, opacity 0.15s;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .지역:active {
+      opacity: 0.75;
+    }
+
+    .지역:hover {
+      opacity: 0.85;
+    }
+
+    .지역--색칠됨 {
+      stroke-width: 2.5;
+    }
+
+    .지역__라벨 {
+      font-size: 13px;
+      font-weight: 700;
+      fill: var(--색-글자);
+      pointer-events: none;
+      text-anchor: middle;
+    }
+
+    .지역__라벨--작음 {
+      font-size: 11px;
+    }
+
+    /* 선택 지역·라벨 목록 */
+    .목록패널 {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .목록패널__설명 {
+      font-size: 0.8rem;
+      color: var(--색-보조글자);
+      margin-bottom: 0.75rem;
+    }
+
+    .목록패널__목록 {
+      flex: 1;
+      overflow-y: auto;
+      list-style: none;
+      border: 1px solid var(--색-테두리);
+      border-radius: 8px;
+      min-height: 160px;
+      max-height: 320px;
+    }
+
+    .목록패널__빈상태 {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      min-height: 180px;
+      color: var(--색-보조글자);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .목록항목 {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid var(--색-테두리);
+    }
+
+    .목록항목__상단 {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .목록항목:last-child {
+      border-bottom: none;
+    }
+
+    .목록항목__색표 {
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+    }
+
+    .목록항목__지역 {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .목록항목__입력 {
+      width: 100%;
+      padding: 0.4rem 0.55rem;
+      font-size: 0.85rem;
+      font-family: inherit;
+      border: 1px solid var(--색-테두리);
+      border-radius: 6px;
+      background: var(--색-카드);
+      color: var(--색-글자);
+    }
+
+    .목록항목__입력:focus {
+      outline: none;
+      border-color: var(--색-강조);
+      box-shadow: 0 0 0 2px var(--색-강조연한);
+    }
+
+    .목록항목__입력::placeholder {
+      color: #aab0b8;
+    }
+
+    .버튼--초기화:hover {
+      background: #fee2e2;
+      border-color: #e74c3c;
+      color: #c0392b;
+    }
+
+    /* 모바일: 세로 스택 + 터치 최적화 */
+    @media (max-width: 768px) {
+      .페이지 {
+        padding: 1rem;
+      }
+
+      .작업영역 {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .사이드패널 {
+        position: static;
+        order: 2;
+      }
+
+      .지도영역 {
+        order: 1;
+      }
+
+      .지도캔버스 {
+        min-height: 320px;
+        padding: 1rem;
+        touch-action: manipulation;
+      }
+
+      .지도캔버스 svg {
+        max-width: 100%;
+      }
+
+      /* 터치하기 쉬운 크기 (최소 44px 권장) */
+      .색상칩 {
+        width: 2.75rem;
+        height: 2.75rem;
+      }
+
+      .버튼 {
+        min-height: 2.75rem;
+        padding: 0.6rem 1.1rem;
+      }
+
+      .목록패널__목록 {
+        max-height: none;
+      }
+    }
+
+    /* 인쇄: 시험용 지도 출력 */
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 1.2cm 1.5cm;
+      }
+
+      :root {
+        --색-배경: #fff;
+        --색-카드: #fff;
+        --색-테두리: #ccc;
+        --그림자: none;
+      }
+
+      body {
+        background: #fff;
+        font-size: 11pt;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .페이지 {
+        max-width: none;
+        padding: 0;
+      }
+
+      .카드 {
+        box-shadow: none;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      /* 도구 패널만 숨김 — 가상 데이터 안내는 인쇄에 포함 */
+      .사이드패널 {
+        display: none !important;
+      }
+
+      .헤더 {
+        margin-bottom: 0.4rem;
+        padding-bottom: 0.4rem;
+        border-bottom: 1px solid #999;
+      }
+
+      .헤더__제목 {
+        font-size: 14pt;
+        margin-bottom: 0.25rem;
+      }
+
+      /* 사용 방법 목록은 인쇄에서 숨김 */
+      .헤더__안내 > p,
+      .헤더__안내 ul {
+        display: none;
+      }
+
+      .가상데이터안내 {
+        margin-top: 0.35rem;
+        padding: 0.35rem 0.5rem;
+        font-size: 8.5pt;
+        background: #fff;
+        border: 1px solid #aaa;
+        color: #333;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .작업영역 {
+        display: block;
+      }
+
+      .지도영역 .패널블록__제목 {
+        font-size: 11pt;
+        margin-bottom: 0.35rem;
+      }
+
+      .지도캔버스 {
+        min-height: auto;
+        height: auto;
+        background: #fff;
+        border: 1px solid #666;
+        border-radius: 0;
+        padding: 0.5rem;
+        overflow: visible;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .지도캔버스 svg {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        max-height: 22cm;
+      }
+
+      /* 인쇄용 선택 목록 */
+      .인쇄목록 {
+        display: block !important;
+        margin-top: 0.5rem;
+        padding-top: 0.4rem;
+        border-top: 1px solid #999;
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+
+      .인쇄목록__제목 {
+        font-size: 10pt;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+      }
+
+      .인쇄목록__항목 {
+        font-size: 10pt;
+        padding: 0.1rem 0;
+        line-height: 1.4;
+      }
+
+      .인쇄목록__범례 {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 0.35rem;
+        font-size: 9pt;
+      }
+
+      .인쇄목록__범례항목 {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      .인쇄목록__범례색 {
+        display: inline-block;
+        width: 0.6rem;
+        height: 0.6rem;
+        border: 1px solid #666;
+        border-radius: 50%;
+      }
+
+      .지역,
+      .목록항목__색표 {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+
+    /* 화면에서는 인쇄용 목록 숨김 */
+    .인쇄목록 {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="페이지">
+
+    <!-- 제목과 사용 안내 -->
+    <header class="헤더 카드">
+      <h1 class="헤더__제목">시험 출제용 지도</h1>
+      <div class="헤더__안내">
+        <p>지도에서 지역을 클릭해 색칠하고, 라벨을 붙여 시험 문제를 만드는 도구입니다.</p>
+        <ul>
+          <li>색상을 고른 뒤 지역을 클릭하면 해당 색으로 칠해지고 목록에 추가됩니다.</li>
+          <li>목록에서 가상 학생 이름을 입력해 라벨을 붙일 수 있습니다.</li>
+          <li>초기화 버튼으로 모든 색칠·라벨을 되돌릴 수 있습니다.</li>
+        </ul>
+        <p class="가상데이터안내" role="note">
+          <strong>가상 데이터 안내</strong> —
+          이 지도는 시험 출제 연습용으로 단순화한 가상 행정구역입니다.
+          실제 지도·경계와 다를 수 있으며, 학생 이름도 예시 입력용입니다.
+        </p>
+      </div>
+    </header>
+
+    <!-- 작업 영역: 지도 + 목록·도구 패널 -->
+    <main class="작업영역">
+
+      <!-- 지도 -->
+      <section class="지도영역 카드" aria-label="지도">
+        <h2 class="패널블록__제목">지도</h2>
+        <div class="지도캔버스" id="지도캔버스" role="img" aria-label="한반도 행정구역 지도"></div>
+        <!-- 인쇄 시에만 표시되는 선택 목록 -->
+        <div class="인쇄목록" id="인쇄목록" aria-hidden="true"></div>
+      </section>
+
+      <!-- 우측: 도구 + 선택 목록 -->
+      <aside class="사이드패널" aria-label="도구 및 선택 목록">
+
+        <section class="도구모음 카드" aria-label="도구">
+          <h2 class="패널블록__제목">도구</h2>
+          <div class="도구모음__그룹">
+            <span class="도구모음__라벨">색상</span>
+            <div class="색상선택" id="색상선택" role="group" aria-label="색상 선택"></div>
+          </div>
+          <div class="도구모음__그룹">
+            <button type="button" class="버튼 버튼--초기화" id="초기화버튼">초기화</button>
+          </div>
+        </section>
+
+        <section class="목록패널 카드" aria-label="선택 목록">
+          <h2 class="패널블록__제목">선택 지역 · 라벨</h2>
+          <p class="목록패널__설명">색칠한 지역과 학생 이름 라벨이 여기에 모입니다.</p>
+          <ul class="목록패널__목록" id="선택목록">
+            <li class="목록패널__빈상태">아직 색칠한 지역이 없습니다</li>
+          </ul>
+        </section>
+
+      </aside>
+
+    </main>
+
+  </div>
+
+  <script>
+    // ── 색상 3가지 ──
+    const 색상목록 = [
+      { id: '빨강', 값: '#e74c3c', 이름: '빨강' },
+      { id: '파랑', 값: '#3498db', 이름: '파랑' },
+      { id: '초록', 값: '#2ecc71', 이름: '초록' }
+    ];
+
+    const 기본지역색 = '#e8edf4';
+
+    // ── 간단 한반도 행정구역 지도 데이터 (6개 지역) ──
+    const 지도데이터 = {
+      viewBox: '0 0 360 500',
+      지역: [
+        {
+          id: '강원',
+          이름: '강원',
+          설명: '동북부 산악·해안 지역',
+          path: 'M 158 18 L 290 28 L 310 115 L 255 195 L 178 168 L 148 85 Z',
+          라벨: { x: 220, y: 115 }
+        },
+        {
+          id: '서울',
+          이름: '서울',
+          설명: '수도권 중심',
+          path: 'M 128 108 L 172 102 L 178 148 L 122 153 Z',
+          라벨: { x: 150, y: 132, 작음: true }
+        },
+        {
+          id: '전라',
+          이름: '전라',
+          설명: '서남부 평야·해안 지역',
+          path: 'M 88 168 L 168 188 L 158 305 L 82 345 L 52 255 Z',
+          라벨: { x: 115, y: 265 }
+        },
+        {
+          id: '경상',
+          이름: '경상',
+          설명: '동남부 내륙·해안 지역',
+          path: 'M 182 188 L 268 205 L 282 310 L 218 305 L 172 218 Z',
+          라벨: { x: 235, y: 265 }
+        },
+        {
+          id: '부산',
+          이름: '부산',
+          설명: '남동부 항구 도시',
+          path: 'M 222 312 L 288 318 L 272 378 L 212 362 Z',
+          라벨: { x: 252, y: 352, 작음: true }
+        },
+        {
+          id: '제주',
+          이름: '제주',
+          설명: '남쪽 섬 지역',
+          path: 'M 128 418 Q 180 398 232 418 Q 252 438 232 458 Q 180 478 128 458 Q 108 438 128 418 Z',
+          라벨: { x: 180, y: 442 }
+        }
+      ]
+    };
+
+    // ── 상태: { 지역id: { 색상, 라벨 } } ──
+    const 지역상태 = {};
+    let 현재색상 = 색상목록[0].값;
+
+    // ── DOM 참조 ──
+    const 지도캔버스 = document.getElementById('지도캔버스');
+    const 선택목록El = document.getElementById('선택목록');
+    const 인쇄목록El = document.getElementById('인쇄목록');
+    const 색상선택El = document.getElementById('색상선택');
+    const 초기화버튼 = document.getElementById('초기화버튼');
+
+    // ── 색상 칩 그리기 ──
+    function 색상칩그리기() {
+      색상선택El.innerHTML = 색상목록.map(function (색, i) {
+        const 선택됨 = 색.값 === 현재색상 ? ' 색상칩--선택됨' : '';
+        return (
+          '<button type="button" class="색상칩' + 선택됨 + '" ' +
+          'style="background:' + 색.값 + ';" ' +
+          'data-색상="' + 색.값 + '" ' +
+          'aria-label="' + 색.이름 + '" ' +
+          'aria-pressed="' + (색.값 === 현재색상) + '"></button>'
+        );
+      }).join('');
+
+      색상선택El.querySelectorAll('.색상칩').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          현재색상 = btn.dataset.색상;
+          색상칩그리기();
+        });
+      });
+    }
+
+    // ── 지역 선택 (클릭·터치 겹침 방지) ──
+    let 마지막터치시각 = 0;
+
+    function 지역선택(지역id, 이벤트) {
+      if (이벤트) {
+        if (이벤트.type === 'touchend') {
+          이벤트.preventDefault();
+          마지막터치시각 = Date.now();
+        }
+        if (이벤트.type === 'click' && Date.now() - 마지막터치시각 < 400) {
+          return;
+        }
+      }
+      지역클릭(지역id);
+    }
+
+    // ── SVG 지도 그리기 ──
+    function 지도그리기() {
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', 지도데이터.viewBox);
+      svg.setAttribute('aria-hidden', 'true');
+
+      지도데이터.지역.forEach(function (지역) {
+        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        g.dataset.id = 지역.id;
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 지역.path);
+        path.setAttribute('class', '지역');
+        path.setAttribute('fill', 기본지역색);
+        path.setAttribute('role', 'button');
+        path.setAttribute('tabindex', '0');
+        path.setAttribute('aria-label', 지역.이름 + ' — ' + 지역.설명);
+
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', 지역.라벨.x);
+        text.setAttribute('y', 지역.라벨.y);
+        text.setAttribute('class', '지역__라벨' + (지역.라벨.작음 ? ' 지역__라벨--작음' : ''));
+        text.textContent = 지역.이름;
+
+        path.addEventListener('click', function (e) { 지역선택(지역.id, e); });
+        path.addEventListener('touchend', function (e) { 지역선택(지역.id, e); }, { passive: false });
+        path.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            지역클릭(지역.id);
+          }
+        });
+
+        g.appendChild(path);
+        g.appendChild(text);
+        svg.appendChild(g);
+      });
+
+      지도캔버스.innerHTML = '';
+      지도캔버스.appendChild(svg);
+      지도색칠갱신();
+    }
+
+    // ── 지역 클릭: 색칠 + 목록 추가 ──
+    function 지역클릭(지역id) {
+      const 기존 = 지역상태[지역id];
+      지역상태[지역id] = {
+        색상: 현재색상,
+        라벨: 기존 ? 기존.라벨 : ''
+      };
+      지도색칠갱신();
+      목록갱신();
+    }
+
+    // ── 지도 색칠 반영 ──
+    function 지도색칠갱신() {
+      지도캔버스.querySelectorAll('.지역').forEach(function (path) {
+        const id = path.parentElement.dataset.id;
+        const 상태 = 지역상태[id];
+        if (상태) {
+          path.setAttribute('fill', 상태.색상);
+          path.classList.add('지역--색칠됨');
+          path.setAttribute('stroke', '#ffffff');
+        } else {
+          path.setAttribute('fill', 기본지역색);
+          path.classList.remove('지역--색칠됨');
+          path.setAttribute('stroke', '#ffffff');
+        }
+      });
+    }
+
+    // ── 선택된 지역 배열 (정렬) ──
+    function 선택지역배열() {
+      const 순서 = ['서울', '강원', '전라', '경상', '부산', '제주'];
+      return 순서.filter(function (id) { return 지역상태[id]; });
+    }
+
+    // ── 우측 패널·인쇄 목록 갱신 ──
+    function 목록갱신() {
+      const 선택됨 = 선택지역배열();
+
+      if (선택됨.length === 0) {
+        선택목록El.innerHTML = '<li class="목록패널__빈상태">아직 색칠한 지역이 없습니다</li>';
+        인쇄목록El.innerHTML = '';
+        return;
+      }
+
+      선택목록El.innerHTML = 선택됨.map(function (id) {
+        const 지역 = 지도데이터.지역.find(function (d) { return d.id === id; });
+        const 상태 = 지역상태[id];
+        const 라벨값 = 상태.라벨 ? ' value="' + 상태.라벨.replace(/"/g, '&quot;') + '"' : '';
+        return (
+          '<li class="목록항목" data-id="' + id + '">' +
+            '<div class="목록항목__상단">' +
+              '<span class="목록항목__색표" style="background:' + 상태.색상 + ';"></span>' +
+              '<span class="목록항목__지역">' + 지역.이름 + '</span>' +
+            '</div>' +
+            '<input type="text" class="목록항목__입력" ' +
+              'placeholder="가상 학생 이름 입력" ' +
+              'aria-label="' + 지역.이름 + ' 학생 이름"' +
+              라벨값 + '>' +
+          '</li>'
+        );
+      }).join('');
+
+      // 라벨 입력 이벤트
+      선택목록El.querySelectorAll('.목록항목__입력').forEach(function (input) {
+        const id = input.closest('.목록항목').dataset.id;
+        input.addEventListener('input', function () {
+          if (지역상태[id]) {
+            지역상태[id].라벨 = input.value.trim();
+            인쇄목록갱신();
+          }
+        });
+      });
+
+      인쇄목록갱신();
+    }
+
+    // ── 인쇄용 목록 ──
+    function 인쇄목록갱신() {
+      const 선택됨 = 선택지역배열();
+      if (선택됨.length === 0) {
+        인쇄목록El.innerHTML = '';
+        return;
+      }
+
+      const 항목html = 선택됨.map(function (id) {
+        const 지역 = 지도데이터.지역.find(function (d) { return d.id === id; });
+        const 상태 = 지역상태[id];
+        const 라벨문구 = 상태.라벨 ? ' — ' + 상태.라벨 : '';
+        return '<p class="인쇄목록__항목">· ' + 지역.이름 + 라벨문구 + '</p>';
+      }).join('');
+
+      const 범례html = 선택됨.map(function (id) {
+        const 지역 = 지도데이터.지역.find(function (d) { return d.id === id; });
+        const 색 = 지역상태[id].색상;
+        return (
+          '<span class="인쇄목록__범례항목">' +
+            '<span class="인쇄목록__범례색" style="background:' + 색 + ';"></span>' +
+            지역.이름 +
+          '</span>'
+        );
+      }).join('');
+
+      인쇄목록El.innerHTML =
+        '<p class="인쇄목록__제목">선택 지역 · 학생 라벨</p>' +
+        항목html +
+        '<div class="인쇄목록__범례">' + 범례html + '</div>';
+    }
+
+    // ── 인쇄 직전 목록 최신화 ──
+    window.addEventListener('beforeprint', function () {
+      인쇄목록갱신();
+    });
+
+    // ── 초기화 ──
+    function 전체초기화() {
+      Object.keys(지역상태).forEach(function (key) { delete 지역상태[key]; });
+      지도색칠갱신();
+      목록갱신();
+    }
+
+    // ── 앱 시작 ──
+    function 앱시작() {
+      색상칩그리기();
+      지도그리기();
+      초기화버튼.addEventListener('click', 전체초기화);
+    }
+
+    앱시작();
+  </script>
+</body>
+</html>
